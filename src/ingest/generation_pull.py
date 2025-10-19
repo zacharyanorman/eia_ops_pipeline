@@ -2,7 +2,25 @@ import requests
 from src.utils.config import EIA_API_KEY
 import json
 from pathlib import Path
-from datetime import datetime
+import datetime
+
+def last_full_month():
+    today = datetime.date.today()
+    y, m = today.year, today.month
+    if m == 1:
+        return y - 1, 12
+    return y, m - 1
+
+def add_months(y: int, m: int, delta: int):
+    total = y * 12 + (m - 1) + delta
+    ny, nm0 = divmod(total, 12)
+    return ny, nm0 + 1
+
+end_y, end_m = last_full_month()
+start_y, start_m = add_months(end_y, end_m, -17)  # 18 months inclusive
+START = f"{start_y:04d}-{start_m:02d}"
+END   = f"{end_y:04d}-{end_m:02d}"
+print("Generation window:", START, "to", END)
 
 url = (
     f"https://api.eia.gov/v2/electricity/facility-fuel/data"
@@ -10,7 +28,7 @@ url = (
     f"&frequency=monthly"
     f"&data[]=generation&data[]=gross-generation"
     f"&facets[state][]=GA"
-    f"&start=2024-07&end=2025-07"   # <-- use the month you saw in your DF
+    f"&start={START}&end={END}"
     f"&sort[0][column]=period&sort[0][direction]=desc"
     f"&length=5000"
 )
@@ -21,7 +39,7 @@ payload = resp.json()
 raw_dir = Path("data/raw")
 raw_dir.mkdir(parents=True, exist_ok=True)
 
-ts = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+ts = datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')
 fname = raw_dir / f"generation_ga_{ts}.json"
 
 with fname.open('w', encoding='utf-8') as f:

@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 import pandas as pd
 
-SECTOR = "COM"  # change to "COM" to load the commercial file
+SECTOR = "RES"  # change to "COM" to load the commercial file
 
 # 1) pick the newest saved raw file for this sector
 raw_dir = Path("data") / "raw"
