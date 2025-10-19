@@ -10,8 +10,9 @@ url = (
     f"&frequency=monthly"
     f"&data[]=generation&data[]=gross-generation"
     f"&facets[state][]=GA"
+    f"&start=2024-07&end=2025-07"   # <-- use the month you saw in your DF
     f"&sort[0][column]=period&sort[0][direction]=desc"
-    f"&length=1"
+    f"&length=5000"
 )
 
 resp = requests.get(url, timeout=30)

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-SECTOR = "COM"
+SECTOR = "RES"
 
 url = (
     f"https://api.eia.gov/v2/electricity/retail-sales/data"
@@ -13,8 +13,9 @@ url = (
     f"&data[]=price&data[]=revenue&data[]=sales&data[]=customers"
     f"&facets[stateid][]=GA"
     f"&facets[sectorid][]={SECTOR}"
+    f"&start=2024-07&end=2025-07"
     f"&sort[0][column]=period&sort[0][direction]=desc"
-    f"&length=1"
+    f"&length=5000"
 )
 
 resp = requests.get(url, timeout=30)

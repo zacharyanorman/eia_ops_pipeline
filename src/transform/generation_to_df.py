@@ -33,8 +33,22 @@ fuel_monthly = (
       .sort_values(["period", "generation"], ascending=[True, False])
 )
 
-# Compute fuel mix share for the period (based on net generation)
-total_by_period = fuel_monthly.groupby("period")["generation"].transform("sum")
-fuel_monthly["fuel_share"] = fuel_monthly["generation"] / total_by_period
+# 1) exclude the summary row and any negative net generation (e.g., pumped storage can be negative)
+clean = fuel_monthly[ fuel_monthly["fuelTypeDescription"].str.lower() != "total" ].copy()
+clean = clean[ clean["generation"] > 0 ].copy()
 
-print(fuel_monthly.head(10))
+# 2) recompute the denominator (sum of positive net generation only)
+denom = clean.groupby("period")["generation"].transform("sum")
+
+# 3) new fuel shares
+clean["fuel_share"] = clean["generation"] / denom
+
+print(clean[["period","fuelTypeDescription","generation","fuel_share"]].head(12))
+
+# 4) save the cleaned version instead of the raw one
+from pathlib import Path
+processed_dir = Path("data") / "processed"
+processed_dir.mkdir(parents=True, exist_ok=True)
+out_path = processed_dir / "generation_ga_fuel_monthly.csv"
+clean.to_csv(out_path, index=False)
+print(f"Saved cleaned fuel summary to: {out_path}")
